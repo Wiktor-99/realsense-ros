@@ -352,14 +352,14 @@ void RealSenseNodeFactory::init()
 void RealSenseNodeFactory::startDevice()
 {
     if (_realSenseNode) _realSenseNode.reset();
+    std::string pid_str(_device.get_info(RS2_CAMERA_INFO_NAME));
     uint16_t pid = 0;
-    std::string device_name(_device.get_info(RS2_CAMERA_INFO_NAME));
     try {
         pid = std::stoi(pid_str, 0, 16);
     } catch (const std::exception&) {
-        if (device_name.find("D435") != std::string::npos)
+        if (pid_str.find("D435") != std::string::npos)
             pid = RS435_RGB_PID;
-        else if (device_name.find("D455") != std::string::npos)
+        else if (pid_str.find("D455") != std::string::npos)
             pid = RS455_PID;
         else
             pid = RS435_RGB_PID;
