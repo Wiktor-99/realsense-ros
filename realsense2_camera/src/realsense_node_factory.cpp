@@ -364,10 +364,13 @@ void RealSenseNodeFactory::startDevice()
         else
             pid = RS435_RGB_PID;
     }
-    // Set GigE packet size to jumbo frames if supported
 
-    try { set_option(RS2_OPTION_PACKET_SIZE, 8228); }
-    catch (const rs2::error&) {}
+    for (auto&& sensor : _device.query_sensors()) {
+        if (sensor.supports(RS2_OPTION_PACKET_SIZE)) {
+            try { sensor.set_option(RS2_OPTION_PACKET_SIZE, 8228); }
+            catch (const rs2::error&) {}
+        }
+    }
 
     try
     {
