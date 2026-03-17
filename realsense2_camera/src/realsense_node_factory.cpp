@@ -365,6 +365,12 @@ void RealSenseNodeFactory::startDevice()
         else
             pid = RS435_RGB_PID;
     }
+    for (auto&& sensor : _device.query_sensors()) {
+        if (sensor.supports(RS2_OPTION_PACKET_SIZE)) {
+            try { sensor.set_option(RS2_OPTION_PACKET_SIZE, 7996); }
+            catch (const rs2::error&) {}
+        }
+    }
     try
     {
         switch(pid)
