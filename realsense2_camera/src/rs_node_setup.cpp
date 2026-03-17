@@ -301,7 +301,7 @@ void BaseRealSenseNode::startPublishers(const std::vector<stream_profile>& profi
             _imu_info_publishers[sip]->publish(info_msg);
         }
         std::string topic_metadata("~/" + stream_name + "/metadata");
-        _metadata_publishers[sip] = _node.create_publisher<realsense2_camera_msgs::msg::Metadata>(topic_metadata, 
+        _metadata_publishers[sip] = _node.create_publisher<realsense2_camera_msgs::msg::Metadata>(topic_metadata,
             rclcpp::QoS(rclcpp::QoSInitialization::from_rmw(info_qos), info_qos));
 
         if (!((rs2::stream_profile)profile==(rs2::stream_profile)_base_profile))
@@ -320,8 +320,8 @@ void BaseRealSenseNode::startPublishers(const std::vector<stream_profile>& profi
     if (_is_accel_enabled && _is_gyro_enabled && (_imu_sync_method > imu_sync_method::NONE))
     {
         rmw_qos_profile_t qos = _use_intra_process ? qos_string_to_qos(DEFAULT_QOS) : qos_string_to_qos(HID_QOS);
-        
-        _synced_imu_publisher = std::make_shared<SyncedImuPublisher>(_node.create_publisher<sensor_msgs::msg::Imu>("~/imu", 
+
+        _synced_imu_publisher = std::make_shared<SyncedImuPublisher>(_node.create_publisher<sensor_msgs::msg::Imu>("~/imu",
                                                         rclcpp::QoS(rclcpp::QoSInitialization::from_rmw(qos), qos)));
     }
 
@@ -560,7 +560,8 @@ void BaseRealSenseNode::CalibConfigReadService(const realsense2_camera_msgs::srv
     try
     {
         (void)req; // silence unused parameter warning
-        res->calib_config = _dev.as<rs2::auto_calibrated_device>().get_calibration_config();
+        auto table = _dev.as<rs2::auto_calibrated_device>().get_calibration_table();
+        res->calib_config = std::string(table.begin(), table.end());
         res->success = true;
     }
     catch (const std::exception &e)
@@ -574,7 +575,8 @@ void BaseRealSenseNode::CalibConfigWriteService(const realsense2_camera_msgs::sr
     realsense2_camera_msgs::srv::CalibConfigWrite::Response::SharedPtr res){
     try
     {
-        _dev.as<rs2::auto_calibrated_device>().set_calibration_config(req->calib_config);
+        rs2::calibration_table table(req->calib_config.begin(), req->calib_config.end());
+        _dev.as<rs2::auto_calibrated_device>().set_calibration_table(table);
         res->success = true;
     }
     catch (const std::exception &e)
