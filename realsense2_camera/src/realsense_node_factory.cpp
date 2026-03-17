@@ -352,9 +352,8 @@ void RealSenseNodeFactory::init()
 void RealSenseNodeFactory::startDevice()
 {
     if (_realSenseNode) _realSenseNode.reset();
-    uint16_t pid = std::stoi(pid_str, 0, 16);
-    std::string device_name(_device.get_info(RS2_CAMERA_INFO_NAME));
     uint16_t pid = 0;
+    std::string device_name(_device.get_info(RS2_CAMERA_INFO_NAME));
     try {
         pid = std::stoi(pid_str, 0, 16);
     } catch (const std::exception&) {
@@ -366,11 +365,10 @@ void RealSenseNodeFactory::startDevice()
             pid = RS435_RGB_PID;
     }
     // Set GigE packet size to jumbo frames if supported
-    if (_device.supports(RS2_OPTION_PACKET_SIZE)) {
-        try { _device.set_option(RS2_OPTION_PACKET_SIZE, 8228); }
-        catch (const rs2::error&) {}
 
-    }
+    try { set_option(RS2_OPTION_PACKET_SIZE, 8228); }
+    catch (const rs2::error&) {}
+
     try
     {
         switch(pid)
