@@ -352,26 +352,19 @@ void RealSenseNodeFactory::init()
 void RealSenseNodeFactory::startDevice()
 {
     if (_realSenseNode) _realSenseNode.reset();
-    std::string pid_str(_device.get_info(RS2_CAMERA_INFO_NAME));
+    std::string pid_str(_device.get_info(RS2_CAMERA_INFO_PRODUCT_ID));
     uint16_t pid = 0;
     try {
         pid = std::stoi(pid_str, 0, 16);
     } catch (const std::exception&) {
-        if (pid_str.find("D435") != std::string::npos)
+        std::string device_name(_device.get_info(RS2_CAMERA_INFO_NAME));
+        if (device_name.find("D435") != std::string::npos)
             pid = RS435_RGB_PID;
-        else if (pid_str.find("D455") != std::string::npos)
+        else if (device_name.find("D455") != std::string::npos)
             pid = RS455_PID;
         else
             pid = RS435_RGB_PID;
     }
-
-    for (auto&& sensor : _device.query_sensors()) {
-        if (sensor.supports(RS2_OPTION_PACKET_SIZE)) {
-            try { sensor.set_option(RS2_OPTION_PACKET_SIZE, 8228); }
-            catch (const rs2::error&) {}
-        }
-    }
-
     try
     {
         switch(pid)
